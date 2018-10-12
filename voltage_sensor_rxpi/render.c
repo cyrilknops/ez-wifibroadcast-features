@@ -159,11 +159,11 @@ void render(telemetry_data_t *td, uint8_t cpuload_gnd, uint8_t temp_gnd, uint8_t
 
 
 //    draw_osdinfos(osdfps, 20, 20, 1);
-
+//added by creal_fpv
 #ifdef RX_VOLTAGE
-    rx_voltage();
+    draw_rx_voltage(rx_voltage(), RX_VOLTAGE_POS_X, RX_VOLTAGE_POS_Y, RX_VOLTAGE_SCALE * GLOBAL_SCALE); //tx_voltage() needs to be changed to a td variable
 #endif
-
+//end added
 #ifdef UPLINK_RSSI
     draw_uplink_signal(td->rx_status_uplink->adapter[0].current_signal_dbm, td->rx_status_uplink->lost_packet_cnt, td->rx_status_rc->adapter[0].current_signal_dbm, td->rx_status_rc->lost_packet_cnt, UPLINK_RSSI_POS_X, UPLINK_RSSI_POS_Y, UPLINK_RSSI_SCALE * GLOBAL_SCALE);
 #endif
@@ -889,44 +889,24 @@ void draw_compass(float heading, float home_heading, float pos_x, float pos_y, f
 
 
 
-void draw_batt_status(float voltage, float current, float pos_x, float pos_y, float scale){
+void draw_batt_status(float voltage, float current, float pos_x, float pos_y, float scale) {
     float text_scale = getWidth(2) * scale;
 
-    VGfloat height_text = TextHeight(myfont, text_scale)+getHeight(0.3)*scale;
+    VGfloat height_text = TextHeight(myfont, text_scale) + getHeight(0.3) * scale;
 
 
-    #if BATT_STATUS_CURRENT == true
+#if BATT_STATUS_CURRENT == true
     sprintf(buffer, "%.1f", current);
     TextEnd(getWidth(pos_x), getHeight(pos_y), buffer, myfont, text_scale);
     Text(getWidth(pos_x), getHeight(pos_y), " A", myfont, text_scale*0.6);
-    #endif
+#endif
 
     //changed by creal_fpv
     sprintf(buffer, "%.1f", voltage);
-    TextEnd(getWidth(pos_x), getHeight(pos_y)+(height_text), buffer, myfont, text_scale);
-    Text(getWidth(pos_x), getHeight(pos_y)+(height_text), " V", myfont, text_scale*0.6);
+    TextEnd(getWidth(pos_x), getHeight(pos_y) + (height_text), buffer, myfont, text_scale);
+    Text(getWidth(pos_x), getHeight(pos_y) + (height_text), " V", myfont, text_scale * 0.6);
     //end changed
 }
-
-//added by creal_fpv
-void draw_batt_mah(float voltage, float current, float pos_x, float pos_y, float scale){
-    float text_scale = getWidth(2) * scale;
-
-    VGfloat height_text = TextHeight(myfont, text_scale)+getHeight(0.3)*scale;
-    if(first){ //little trick needed to be done to take the initial time
-        lastT = current_ts();
-        first = false;
-    }
-    timeDiff = current_ts() - lastT; //get the time difference between last time and new time
-    mAhDrawRaw = current * timeDiff / 3600; //calculate the mAh
-    mAhDrawn += mAhDrawRaw; //add the calculated mAh the total used
-
-    lastT = current_ts(); //set lastT back to current time
-    sprintf(buffer, "%.f", mAhDrawn);
-    TextEnd(getWidth(pos_x), getHeight(pos_y), buffer, myfont, text_scale);
-    Text(getWidth(pos_x), getHeight(pos_y), " mAh", myfont, text_scale*0.6);
-}
-//end edded
 
 void draw_position(float lat, float lon, float pos_x, float pos_y, float scale){
     float text_scale = getWidth(2) * scale;
@@ -943,8 +923,6 @@ void draw_position(float lat, float lon, float pos_x, float pos_y, float scale){
     sprintf(buffer, "%.6f", lat);
     TextEnd(getWidth(pos_x), getHeight(pos_y)+height_text, buffer, myfont, text_scale);
 }
-
-
 
 void draw_home_distance(int distance, bool home_fixed, float pos_x, float pos_y, float scale){
     float text_scale = getWidth(2) * scale;
@@ -971,8 +949,6 @@ void draw_home_distance(int distance, bool home_fixed, float pos_x, float pos_y,
     #endif
     TextEnd(getWidth(pos_x), getHeight(pos_y), buffer, myfont, text_scale);
 }
-
-
 
 void draw_alt_ladder(int alt, float pos_x, float pos_y, float scale){
     float text_scale = getHeight(1.3) * scale;
@@ -1328,6 +1304,36 @@ void draw_osdinfos(int osdfps, float pos_x, float pos_y, float scale){
     TextEnd(getWidth(pos_x), getHeight(pos_y), buffer, myfont, text_scale);
 }
 
+//added by creal_fpv
+void draw_batt_mah(float voltage, float current, float pos_x, float pos_y, float scale){
+    float text_scale = getWidth(2) * scale;
+
+    VGfloat height_text = TextHeight(myfont, text_scale)+getHeight(0.3)*scale;
+    if(first){ //little trick needed to be done to take the initial time
+        lastT = current_ts();
+        first = false;
+    }
+    timeDiff = current_ts() - lastT; //get the time difference between last time and new time
+    mAhDrawRaw = current * timeDiff / 3600; //calculate the mAh
+    mAhDrawn += mAhDrawRaw; //add the calculated mAh the total used
+
+    lastT = current_ts(); //set lastT back to current time
+    sprintf(buffer, "%.f", mAhDrawn);
+    TextEnd(getWidth(pos_x), getHeight(pos_y), buffer, myfont, text_scale);
+    Text(getWidth(pos_x), getHeight(pos_y), " mAh", myfont, text_scale*0.6);
+}
+
+void draw_tx_voltage(float rx_voltage, float pos_x, float pos_y, float scale){
+    float text_scale = getWidth(2) * scale;
+    VGfloat height_text = TextHeight(myfont, text_scale)+getHeight(0.3)*scale;
+
+    sprintf(buffer, "%.1f", rx_voltage);
+    TextEnd(getWidth(pos_x), getHeight(pos_y), buffer, myfont, text_scale);
+    Text(getWidth(pos_x), getHeight(pos_y), " V", myfont, text_scale*0.6);
+}
+
+
+//end edded
 
 float distance_between(float lat1, float long1, float lat2, float long2) {
     //taken from tinygps: https://github.com/mikalhart/TinyGPS/blob/master/TinyGPS.cpp#L296

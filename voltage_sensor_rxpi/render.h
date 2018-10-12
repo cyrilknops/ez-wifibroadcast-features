@@ -49,6 +49,7 @@ void draw_batt_gauge(int remaining, float pos_x, float pos_y, float scale);
 void draw_batt_status(float voltage, float current, float pos_x, float pos_y, float scale);
 //added by creal_fpv
 void draw_batt_mah(float voltage, float current, float pos_x, float pos_y, float scale);
+void draw_rx_voltage(float rx_voltage, float pos_x, float pos_y, float scale);
 //added end
 void draw_position(float lat, float lon, float pos_x, float pos_y, float scale);
 void draw_sat(int sats, int fixtype, float pos_x, float pos_y, float scale);
