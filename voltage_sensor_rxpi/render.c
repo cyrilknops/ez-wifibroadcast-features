@@ -160,7 +160,7 @@ void render(telemetry_data_t *td, uint8_t cpuload_gnd, uint8_t temp_gnd, uint8_t
 
 //    draw_osdinfos(osdfps, 20, 20, 1);
 
-#ifdef RXVOLTAGE
+#ifdef RX_VOLTAGE
     rx_voltage();
 #endif
 
