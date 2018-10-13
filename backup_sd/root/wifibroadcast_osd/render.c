@@ -21,7 +21,6 @@
 #include "render.h"
 #include "telemetry.h"
 #include "osdconfig.h"
-#include "sensor.h"
 
 #define TO_FEET 3.28084
 #define TO_MPH 0.621371
@@ -45,12 +44,6 @@ int injection_failed_last;
 int tx_restart_count_last;
 
 bool no_signal = false;
-
-//added by creal_fpv
-float mAhDrawRaw, mAhDrawn;
-bool first = true;
-long long lastT, timeDiff;
-//end added
 
 long long current_ts() {
     struct timeval te;
@@ -161,8 +154,6 @@ void render(telemetry_data_t *td, uint8_t cpuload_gnd, uint8_t temp_gnd, uint8_t
 
 //    draw_osdinfos(osdfps, 20, 20, 1);
 
-//added by creal_fpv
-//rxVoltage();
 
 
 #ifdef UPLINK_RSSI
@@ -279,11 +270,6 @@ void render(telemetry_data_t *td, uint8_t cpuload_gnd, uint8_t temp_gnd, uint8_t
 
 #ifdef BATT_STATUS
     draw_batt_status(td->voltage, td->ampere, BATT_STATUS_POS_X, BATT_STATUS_POS_Y, BATT_STATUS_SCALE * GLOBAL_SCALE);
-#endif
-
-//added by creal_fp
-#ifdef BATT_MAH
-    draw_batt_mah(td->voltage, td->ampere, BATT_MAH_POS_X, BATT_MAH_POS_Y, BATT_MAH_SCALE * GLOBAL_SCALE);
 #endif
 
 #ifdef POSITION
@@ -907,33 +893,6 @@ void draw_batt_status(float voltage, float current, float pos_x, float pos_y, fl
     TextEnd(getWidth(pos_x), getHeight(pos_y)+(height_text), buffer, myfont, text_scale);
     Text(getWidth(pos_x), getHeight(pos_y)+(height_text), " V", myfont, text_scale*0.6);
     //end changed
-}
-
-void draw_batt_mah(float voltage, float current, float pos_x, float pos_y, float scale){
-    float text_scale = getWidth(2) * scale;
-
-    VGfloat height_text = TextHeight(myfont, text_scale)+getHeight(0.3)*scale;
-
-    //added by creal_fpv
-    if(voltage <= 0){ //reset mAhDrawn if battery is removed
-        mAhDrawn = 0;
-    }
-    if(first){ //little trick needed to be done to take the initial time
-        lastT = current_ts();
-        first = false;
-    }
-    timeDiff = current_ts() - lastT; //get the time difference between last time and new time
-    mAhDrawRaw = current * timeDiff / 3600; //calculate the mAh
-    mAhDrawn += mAhDrawRaw; //add the calculated mAh the total used
-
-    lastT = current_ts(); //set lastT back to current time
-    //end edded
-
-    //added by creal_fpv
-    sprintf(buffer, "%.f", mAhDrawn);
-    TextEnd(getWidth(pos_x), getHeight(pos_y), buffer, myfont, text_scale);
-    Text(getWidth(pos_x), getHeight(pos_y), " mAh", myfont, text_scale*0.6);
-    //end edded
 }
 
 void draw_position(float lat, float lon, float pos_x, float pos_y, float scale){
